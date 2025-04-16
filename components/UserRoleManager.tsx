@@ -1,8 +1,8 @@
 'use client';
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { fetchAllRoles, Role } from '@/service/role.service'; 
 
 const menuItems = [
   { id: 'system', name: 'Hệ thống', icon: '⚙️' },
@@ -27,6 +27,27 @@ const permissionData = [
 export default function UserRoleManager() {
   const [activeMenu, setActiveMenu] = useState('permission');
   const [searchTerm, setSearchTerm] = useState('');
+  const [roles, setRoles] = useState<Role[]>([]); // State để lưu danh sách roles
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false); // State cho trạng thái loading (tùy chọn)
+  const [selectedRole, setSelectedRole] = useState(''); // State lưu giá trị role đang chọn trong Select
+
+  // Gọi API khi component được mount lần đầu
+  useEffect(() => {
+    const loadRoles = async () => {
+      setIsLoadingRoles(true); // Bắt đầu loading
+      try {
+        const fetchedRoles = await fetchAllRoles();
+        setRoles(fetchedRoles); // Lưu roles vào state
+      } catch (error) {
+        // Có thể thêm state để hiển thị lỗi cho người dùng
+        console.error("Failed to load roles:", error);
+      } finally {
+        setIsLoadingRoles(false); // Kết thúc loading
+      }
+    };
+
+    loadRoles();
+  }, []); // Mảng dependency rỗng nghĩa là chỉ chạy 1 lần sau khi mount
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -72,11 +93,24 @@ export default function UserRoleManager() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Select className="min-w-[180px]">
-                    <SelectItem value="">Tất cả nhóm quyền</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
+                {/* --- Cập nhật Select component --- */}
+                <Select
+                  className="min-w-[180px]"
+                  value={selectedRole} // Gán giá trị state
+                  onValueChange={setSelectedRole} // Cập nhật state khi chọn
+                  disabled={isLoadingRoles} // Vô hiệu hóa khi đang load (tùy chọn)
+                >
+                  <SelectItem value="">Tất cả nhóm quyền</SelectItem>
+                  {/* Render các option từ state roles */}
+                  {roles.map((role) => (
+                    <SelectItem key={role._id} value={String(role._id)}> {/* Đảm bảo value là string nếu cần */}
+                      {role.name} {/* Hiển thị tên role */}
+                    </SelectItem>
+                  ))}
+                  {/* Có thể thêm option loading */}
+                  {isLoadingRoles && <SelectItem value="" disabled>Đang tải...</SelectItem>}
                 </Select>
+                 {/* --- Hết phần cập nhật Select --- */}
                 </div>
                 <Button className="bg-blue-600 hover:bg-blue-700 px-4 py-2">
                 Lưu thay đổi
@@ -166,29 +200,33 @@ export default function UserRoleManager() {
   );
 }
 
-// Component Select đã được sửa
-function Select({ 
-    children, 
-    value, 
-    onValueChange, 
-    className = "" 
+// Component Select và SelectItem
+function Select({
+    children,
+    value,
+    onValueChange,
+    className = "",
+    disabled = false 
   }: { 
-    children: React.ReactNode; 
-    value?: string; 
+    children: React.ReactNode;
+    value?: string;
     onValueChange?: (value: string) => void;
     className?: string;
+    disabled?: boolean; 
   }) {
     return (
-      <select 
-        className={`border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className}`}
+      <select
+        className={`border rounded-full px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${className} ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
         value={value}
         onChange={(e) => onValueChange?.(e.target.value)}
+        disabled={disabled} // Prop này được sử dụng ở đây
       >
         {children}
       </select>
     );
   }
-  
-  function SelectItem({ children, value }: { children: React.ReactNode; value: string }) {
-    return <option value={value}>{children}</option>;
-  }
+
+// SelectItem đã có 'disabled' trong type definition rồi nên không cần sửa
+function SelectItem({ children, value, disabled = false }: { children: React.ReactNode; value: string; disabled?: boolean }) {
+    return <option value={value} disabled={disabled}>{children}</option>;
+}
