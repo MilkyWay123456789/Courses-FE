@@ -8,6 +8,8 @@ interface AddRoleModalProps {
   newRole: { name: string; description: string };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleAddRole: (e: React.FormEvent) => void;
+  handleUpdateRole: (e: React.FormEvent) => void; 
+  mode: 'add' | 'edit';
   triggerButtonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -17,6 +19,8 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
   newRole,
   handleInputChange,
   handleAddRole,
+  handleUpdateRole,
+  mode,
   triggerButtonRef,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -77,27 +81,19 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
 
   return (
     <>
-      {/* Overlay */}
-      {/* <div 
-        className={`fixed inset-0 bg-black/30 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0'
-        }`}
-        onClick={() => setIsOpen(false)}
-      /> */}
-      
       {/* Modal content */}
       <div
         ref={modalRef}
         className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in">
+        <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in border border-gray-300">
           <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">
-            Thêm Role Mới
+            {mode === 'edit' ? 'Chỉnh sửa Vai Trò' : 'Thêm Vai Trò Mới'}
           </h2>
-          <form onSubmit={handleAddRole}>
+          <form onSubmit={mode === 'edit' ? handleUpdateRole : handleAddRole}>
             <div className="mb-4">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Tên Role
+                Tên Vai Trò
               </label>
               <Input
                 type="text"
@@ -111,7 +107,7 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
             </div>
             <div className="mb-6">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Mô tả
+                Mô Tả Vai Trò
               </label>
               <Input
                 type="text"
@@ -128,13 +124,12 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
                 Hủy
               </Button>
               <Button type="submit" className="px-4 py-2">
-                Thêm
+                {mode === 'edit' ? 'Cập nhật' : 'Thêm'}
               </Button>
             </div>
           </form>
         </div>
       </div>
-
     </>
   );
 };

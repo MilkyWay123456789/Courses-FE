@@ -1,17 +1,21 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { fetchAllRoles, addRole, Role } from '@/service/role.service'; 
-import AddRoleModal from './AddRoleModal';
+import { fetchAllRoles, addRole, updateRole, deleteRole, Role } from '@/service/role.service'; 
+import AddRoleModal from './Modal/AddRoleModal';
+import DeleteModal from './Modal/DeleteModal';
 import { toast } from 'react-hot-toast';
 
 export default function Roles() {
   const [searchTerm, setSearchTerm] = useState('');
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
-  const [selectedRole, setSelectedRole] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newRole, setNewRole] = useState({ name: '', description: '' });
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [mode, setMode] = useState<'add' | 'edit'>('add');
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedRoleId, setSelectedRoleId] = useState<string | number>();
 
   // Gọi API khi component được mount lần đầu
   useEffect(() => {
@@ -30,6 +34,7 @@ export default function Roles() {
     loadRoles();
   }, []);
 
+  //Hàm add role
   const handleAddRole = async (e: React.FormEvent) => {
     e.preventDefault();
   
@@ -49,12 +54,83 @@ export default function Roles() {
       setRoles(prev => [...prev, result]);
       setNewRole({ name: '', description: '' });
       setIsModalOpen(false);
+      setMode('add');
     } catch (error) {
       // Có thể log lỗi nếu cần
       console.error('Lỗi khi thêm vai trò:', error);
     }
   };
 
+  //Hàm edit role
+  const handleUpdateRole = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    try {
+      if (!editingRole?._id) {
+        toast.error('Không tìm thấy ID vai trò để cập nhật!');
+        return;
+      }
+  
+      const roleData = {
+        name: newRole.name,
+        description: newRole.description,
+      };
+  
+      const result = await toast.promise(
+        updateRole(editingRole._id, roleData),
+        {
+          loading: 'Đang cập nhật vai trò...',
+          success: 'Cập nhật vai trò thành công!',
+          error: 'Cập nhật vai trò thất bại!',
+        }
+      );
+  
+      if (!result) return;
+  
+      // Cập nhật lại list vai trò
+      setRoles(prev => prev.map(r => r._id === result._id ? result : r));
+  
+      // Reset form
+      setNewRole({ name: '', description: '' });
+      setEditingRole(null);
+      setIsModalOpen(false);
+      setMode('add');
+    } catch (error) {
+      console.error('Lỗi khi cập nhật vai trò:', error);
+    }
+  };
+ 
+  //Hàm click update
+  const handleEditClick = (role: Role) => {
+    setEditingRole(role); 
+    setNewRole({ name: role.name, description: role.description }); 
+    setIsModalOpen(true); 
+    setMode('edit'); 
+  };
+
+  //Hàm click khi xóa
+  const handleDeleteClick = (id: string | number) => {
+    setSelectedRoleId(id);
+    setIsDeleteModalOpen(true);
+  };
+  
+  //Hàm xóa
+  const handleConfirmDelete = async () => {
+    if (!selectedRoleId) return;
+  
+    const result = await toast.promise(deleteRole(selectedRoleId), {
+      loading: 'Đang xóa vai trò...',
+      success: 'Xóa thành công!',
+      error: 'Xóa thất bại!',
+    });
+  
+    if (result) {
+      setRoles(prev => prev.filter(role => role._id !== selectedRoleId));
+    }
+  
+    setIsDeleteModalOpen(false);
+    setSelectedRoleId('');
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewRole((prev) => ({ ...prev, [name]: value }));
@@ -104,7 +180,8 @@ export default function Roles() {
                     <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{role.description}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50">
+                        <button className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                        onClick={() => handleEditClick(role)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -114,7 +191,8 @@ export default function Roles() {
                             <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                           </svg>
                         </button>
-                        <button className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50">
+                        <button className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                        onClick={() => handleDeleteClick(role._id)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -163,7 +241,14 @@ export default function Roles() {
         newRole={newRole}
         handleInputChange={handleInputChange}
         handleAddRole={handleAddRole}
+        handleUpdateRole={handleUpdateRole} 
+        mode={mode} 
         triggerButtonRef={triggerButtonRef} 
+      />
+      <DeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
       />
     </div>
   );

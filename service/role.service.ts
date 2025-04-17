@@ -27,3 +27,30 @@ export const addRole = async (role: Omit<Role, '_id'>): Promise<Role | null> => 
       return null;
     }
   };
+//Hàm update role
+  export const updateRole = async (
+    id: string | number,
+    role: Omit<Role, '_id'>
+  ): Promise<Role | null> => {
+    try {
+      const response = await axiosInstance.put<Role>(`roles/UpdateRole/${id}`, role);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating role:", error);
+      return null;
+    }
+  };
+
+//Hàm delete role
+export const deleteRole = async (
+  id: string | number,
+): Promise<Boolean> => {
+  try {
+    const response = await axiosInstance.delete<Role>(`roles/DeleteRole/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Error updating role:", error);
+    return false;
+  }
+};
+  
