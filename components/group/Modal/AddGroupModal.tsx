@@ -2,24 +2,24 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-interface AddRoleModalProps {
+interface AddGroupModalProps {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  newRole: { name: string; description: string };
+  newGroup: { name: string; description: string };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleAddRole: (e: React.FormEvent) => void;
-  handleUpdateRole: (e: React.FormEvent) => void; 
+  handleAddGroup: (e: React.FormEvent) => void;
+  handleUpdateGroup: (e: React.FormEvent) => void; 
   mode: 'add' | 'edit';
   triggerButtonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
-const AddRoleModal: React.FC<AddRoleModalProps> = ({
+const AddGroupModal: React.FC<AddGroupModalProps> = ({
   isOpen,
   setIsOpen,
-  newRole,
+  newGroup,
   handleInputChange,
-  handleAddRole,
-  handleUpdateRole,
+  handleAddGroup,
+  handleUpdateGroup,
   mode,
   triggerButtonRef,
 }) => {
@@ -88,18 +88,18 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
       >
         <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md animate-fade-in border border-gray-300">
           <h2 className="text-xl font-bold text-gray-800 mb-6 text-center">
-            {mode === 'edit' ? 'Chỉnh sửa quyền' : 'Thêm quyền'}
+            {mode === 'edit' ? 'Chỉnh sửa nhóm' : 'Thêm nhóm'}
           </h2>
-          <form onSubmit={mode === 'edit' ? handleUpdateRole : handleAddRole}>
+          <form onSubmit={mode === 'edit' ? handleUpdateGroup : handleAddGroup}>
             <div className="mb-4">
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Tên quyền
+                Tên nhóm
               </label>
               <Input
                 type="text"
                 id="name"
                 name="name"
-                value={newRole.name}
+                value={newGroup.name}
                 onChange={handleInputChange}
                 className="w-full"
                 required
@@ -107,13 +107,13 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
             </div>
             <div className="mb-6">
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                Mô tả quyền
+                Mô tả nhóm
               </label>
               <Input
                 type="text"
                 id="description"
                 name="description"
-                value={newRole.description}
+                value={newGroup.description}
                 onChange={handleInputChange}
                 className="w-full"
               />
@@ -133,4 +133,4 @@ const AddRoleModal: React.FC<AddRoleModalProps> = ({
   );
 };
 
-export default AddRoleModal;
+export default AddGroupModal;

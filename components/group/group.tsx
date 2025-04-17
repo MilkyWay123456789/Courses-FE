@@ -1,46 +1,46 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { fetchAllRoles, addRole, updateRole, deleteRole, Role } from '@/service/role.service'; 
-import AddRoleModal from './Modal/AddRoleModal';
-import DeleteModal from './Modal/DeleteModal';
+import { fetchAllGroup, addGroup, updateGroup, deleteGroup, Group } from '@/service/group.service'; 
+import AddGroupModal from './Modal/AddGroupModal';
+import DeleteModal from './Modal/DeleteGroupModal';
 import { toast } from 'react-hot-toast';
 
-export default function Roles() {
+export default function Groups() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [roles, setRoles] = useState<Role[]>([]);
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [Group, setGroup] = useState<Group[]>([]);
+  const [isLoadingGroup, setIsLoadingGroup] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newRole, setNewRole] = useState({ name: '', description: '' });
+  const [newGroup, setNewGroup] = useState({ name: '', description: '' });
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
-  const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedRoleId, setSelectedRoleId] = useState<string | number>();
+  const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
   // Gọi API khi component được mount lần đầu
   useEffect(() => {
-    const loadRoles = async () => {
-      setIsLoadingRoles(true);
+    const loadGroup = async () => {
+      setIsLoadingGroup(true);
       try {
-        const fetchedRoles = await fetchAllRoles();
-        setRoles(fetchedRoles);
+        const fetchedGroup = await fetchAllGroup();
+        setGroup(fetchedGroup);
       } catch (error) {
-        console.error("Failed to load roles:", error);
+        console.error("Failed to load Group:", error);
       } finally {
-        setIsLoadingRoles(false);
+        setIsLoadingGroup(false);
       }
     };
 
-    loadRoles();
+    loadGroup();
   }, []);
 
-  //Hàm add role
-  const handleAddRole = async (e: React.FormEvent) => {
+  //Hàm add Group
+  const handleAddGroup = async (e: React.FormEvent) => {
     e.preventDefault();
   
     try {
       const result = await toast.promise(
-        addRole(newRole),
+        addGroup(newGroup),
         {
           loading: 'Đang thêm vai trò...',
           success: 'Thêm vai trò thành công!',
@@ -51,8 +51,8 @@ export default function Roles() {
       // Nếu result là null (do API trả về), bỏ qua
       if (!result) return;
   
-      setRoles(prev => [...prev, result]);
-      setNewRole({ name: '', description: '' });
+      setGroup(prev => [...prev, result]);
+      setNewGroup({ name: '', description: '' });
       setIsModalOpen(false);
       setMode('add');
     } catch (error) {
@@ -61,23 +61,23 @@ export default function Roles() {
     }
   };
 
-  //Hàm edit role
-  const handleUpdateRole = async (e: React.FormEvent) => {
+  //Hàm edit Group
+  const handleUpdateGroup = async (e: React.FormEvent) => {
     e.preventDefault();
   
     try {
-      if (!editingRole?._id) {
+      if (!editingGroup?._id) {
         toast.error('Không tìm thấy ID vai trò để cập nhật!');
         return;
       }
   
-      const roleData = {
-        name: newRole.name,
-        description: newRole.description,
+      const GroupData = {
+        name: newGroup.name,
+        description: newGroup.description,
       };
   
       const result = await toast.promise(
-        updateRole(editingRole._id, roleData),
+        updateGroup(editingGroup._id, GroupData),
         {
           loading: 'Đang cập nhật vai trò...',
           success: 'Cập nhật vai trò thành công!',
@@ -88,11 +88,11 @@ export default function Roles() {
       if (!result) return;
   
       // Cập nhật lại list vai trò
-      setRoles(prev => prev.map(r => r._id === result._id ? result : r));
+      setGroup(prev => prev.map(r => r._id === result._id ? result : r));
   
       // Reset form
-      setNewRole({ name: '', description: '' });
-      setEditingRole(null);
+      setNewGroup({ name: '', description: '' });
+      setEditingGroup(null);
       setIsModalOpen(false);
       setMode('add');
     } catch (error) {
@@ -101,52 +101,52 @@ export default function Roles() {
   };
  
   //Hàm click update
-  const handleEditClick = (role: Role) => {
-    setEditingRole(role); 
-    setNewRole({ name: role.name, description: role.description }); 
+  const handleEditClick = (Group: Group) => {
+    setEditingGroup(Group); 
+    setNewGroup({ name: Group.name, description: Group.description }); 
     setIsModalOpen(true); 
     setMode('edit'); 
   };
 
   //Hàm click khi xóa
   const handleDeleteClick = (id: string | number) => {
-    setSelectedRoleId(id);
+    setSelectedGroupId(id);
     setIsDeleteModalOpen(true);
   };
   
   //Hàm xóa
   const handleConfirmDelete = async () => {
-    if (!selectedRoleId) return;
+    if (!selectedGroupId) return;
   
-    const result = await toast.promise(deleteRole(selectedRoleId), {
+    const result = await toast.promise(deleteGroup(selectedGroupId), {
       loading: 'Đang xóa vai trò...',
       success: 'Xóa thành công!',
       error: 'Xóa thất bại!',
     });
   
     if (result) {
-      setRoles(prev => prev.filter(role => role._id !== selectedRoleId));
+      setGroup(prev => prev.filter(Group => Group._id !== selectedGroupId));
     }
   
     setIsDeleteModalOpen(false);
-    setSelectedRoleId('');
+    setSelectedGroupId('');
   };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewRole((prev) => ({ ...prev, [name]: value }));
+    setNewGroup((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-800">Danh sách quyền</h1>
+          <h1 className="text-xl font-semibold text-gray-800">Danh sách nhóm</h1>
           <button
             ref={triggerButtonRef} // Thêm ref vào button
             onClick={() => setIsModalOpen(true)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm"
           >
-            Thêm quyền mới
+            Thêm nhóm mới
           </button>
         </div>
         <div className="overflow-x-auto">
@@ -154,34 +154,34 @@ export default function Roles() {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STT</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên quyền</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên nhóm</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mô tả</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hành động</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {isLoadingRoles ? (
+              {isLoadingGroup ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
                     Đang tải...
                   </td>
                 </tr>
-              ) : roles.length === 0 ? (
+              ) : Group.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
-                    Không có role nào
+                    Không có Group nào
                   </td>
                 </tr>
               ) : (
-                roles.map((role, index) => (
-                  <tr key={role._id} className="hover:bg-gray-50">
+                Group.map((Group, index) => (
+                  <tr key={Group._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{index + 1}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{role.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{role.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{Group.name}</td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">{Group.description}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <div className="flex space-x-2">
                         <button className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
-                        onClick={() => handleEditClick(role)}>
+                        onClick={() => handleEditClick(Group)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -192,7 +192,7 @@ export default function Roles() {
                           </svg>
                         </button>
                         <button className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                        onClick={() => handleDeleteClick(role._id)}>
+                        onClick={() => handleDeleteClick(Group._id)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="h-5 w-5"
@@ -216,8 +216,8 @@ export default function Roles() {
         </div>
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
           <div className="text-sm text-gray-500">
-            Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">{roles.length}</span> trong{' '}
-            <span className="font-medium">{roles.length}</span> roles
+            Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">{Group.length}</span> trong{' '}
+            <span className="font-medium">{Group.length}</span> Group
           </div>
           <div className="flex space-x-2">
             <button
@@ -235,13 +235,13 @@ export default function Roles() {
           </div>
         </div>
       </div>
-      <AddRoleModal
+      <AddGroupModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
-        newRole={newRole}
+        newGroup={newGroup}
         handleInputChange={handleInputChange}
-        handleAddRole={handleAddRole}
-        handleUpdateRole={handleUpdateRole} 
+        handleAddGroup={handleAddGroup}
+        handleUpdateGroup={handleUpdateGroup} 
         mode={mode} 
         triggerButtonRef={triggerButtonRef} 
       />
