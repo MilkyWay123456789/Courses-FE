@@ -50,17 +50,6 @@ export default function Sidebar() {
           </li>
           <li>
             <Link
-              href="/main/permission"
-              className={`flex items-center p-2 rounded ${
-                pathname.startsWith('/main/permission') ? 'bg-blue-300' : 'hover:bg-blue-100'
-              }`}
-            >
-              <Key className="w-5 h-5 mr-2" />
-              Cấp quyền
-            </Link>
-          </li>
-          <li>
-            <Link
               href="/main/role"
               className={`flex items-center p-2 rounded ${
                 pathname.startsWith('/main/role') ? 'bg-blue-200' : 'hover:bg-blue-100'
@@ -68,6 +57,17 @@ export default function Sidebar() {
             >
               <Users className="w-5 h-5 mr-2" />
               Nhóm quyền
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/main/permission"
+              className={`flex items-center p-2 rounded ${
+                pathname.startsWith('/main/permission') ? 'bg-blue-300' : 'hover:bg-blue-100'
+              }`}
+            >
+              <Key className="w-5 h-5 mr-2" />
+              Cấp quyền
             </Link>
           </li>
         </ul>

@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { fetchAllRoles, Role } from '@/service/role.service'; 
+import { fetchAllGroup, Group } from '@/service/group.service';
+import { fetchPermissionsByRole, updatePermission, Permission } from '@/service/permission.service'; 
 
 const permissionData = [
   { stt: 1, tenQuyen: 'Báo cáo dịch vụ chi tiết dịch vụ - Xem danh sách', menu: 'Báo cáo dịch vụ' },
@@ -13,27 +15,50 @@ const permissionData = [
 export default function UserRoleManager() {
   const [activeMenu, setActiveMenu] = useState('permission');
   const [searchTerm, setSearchTerm] = useState('');
-  const [roles, setRoles] = useState<Role[]>([]); // State để lưu danh sách roles
-  const [isLoadingRoles, setIsLoadingRoles] = useState(false); // State cho trạng thái loading (tùy chọn)
-  const [selectedRole, setSelectedRole] = useState(''); // State lưu giá trị role đang chọn trong Select
+  const [roles, setRoles] = useState<Role[]>([]); 
+  const [groups, setGroups] = useState<Group[]>([]); 
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false); 
+  const [isLoadingGroups, setIsLoadingGroups] = useState(false); 
+  const [selectedRole, setSelectedRole] = useState(''); 
+  const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
   // Gọi API khi component được mount lần đầu
   useEffect(() => {
+    //Hàm load role 
     const loadRoles = async () => {
-      setIsLoadingRoles(true); // Bắt đầu loading
+      setIsLoadingRoles(true); 
       try {
         const fetchedRoles = await fetchAllRoles();
-        setRoles(fetchedRoles); // Lưu roles vào state
+        setRoles(fetchedRoles); 
       } catch (error) {
-        // Có thể thêm state để hiển thị lỗi cho người dùng
         console.error("Failed to load roles:", error);
       } finally {
-        setIsLoadingRoles(false); // Kết thúc loading
+        setIsLoadingRoles(false); 
       }
     };
-
     loadRoles();
-  }, []); // Mảng dependency rỗng nghĩa là chỉ chạy 1 lần sau khi mount
+    //Hàm load role 
+    const loadGroups = async () => {
+      setIsLoadingGroups(true); 
+      try {
+        const fetchedGroups = await fetchAllGroup();
+        setGroups(fetchedGroups); 
+      } catch (error) {
+        console.error("Failed to load roles:", error);
+      } finally {
+        setIsLoadingGroups(false); 
+      }
+    };
+    loadGroups();
+  }, []); 
+
+  //Hàm get permission
+  const handleClick = async (groupId: string | number) => {
+    setSelectedGroupId(groupId);
+    // Lấy dữ liệu permissions từ API
+    const permissionData = await fetchPermissionsByRole(groupId);
+    setRoles(permissionData);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -73,13 +98,19 @@ export default function UserRoleManager() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {roles.map((role, index) => (
-                                <tr key={role._id} className="hover:bg-gray-50">
+                                {groups.map((group, index) => (
+                                  <tr
+                                    key={group._id}
+                                    onClick={() => handleClick(group._id)}
+                                    className={`cursor-pointer hover:bg-gray-50 ${
+                                      selectedGroupId === group._id ? 'bg-blue-100' : ''
+                                    }`}
+                                  >                              
                                     <td className="p-3 text-sm text-gray-600 border-r border-gray-300 w-[60px]">{index + 1}</td>
                                     <td className="p-3 text-sm font-medium text-gray-800 border-r border-gray-300 w-[40%]">
-                                    {role.name}
+                                    {group.name}
                                     </td>
-                                    <td className="p-3 text-sm font-medium text-gray-800">{role.description}</td>
+                                    <td className="p-3 text-sm font-medium text-gray-800">{group.description}</td>
                                 </tr>
                                 ))}
                             </tbody>
@@ -95,17 +126,15 @@ export default function UserRoleManager() {
                                 <tr>
                                 <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase w-[60px]">STT</th>
                                 <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase">Tên quyền</th>
-                                <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase">Menu</th>
-                                <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase w-[80px]">Hiệu lực</th>
-                                <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase w-[80px]">Reset MK</th>
+                                <th className="p-3 text-left text-xs font-medium text-gray-500 uppercase">Mô tả</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {permissionData.map((permission) => (
-                                <tr key={permission.stt} className="hover:bg-gray-50">
-                                    <td className="p-3 text-sm text-gray-600 w-[60px]">{permission.stt}</td>
-                                    <td className="p-3 text-sm text-gray-600">{permission.tenQuyen}</td>
-                                    <td className="p-3 text-sm text-gray-600">{permission.menu}</td>
+                                {roles.map((role, index) => (
+                                <tr key={role._id} className="hover:bg-gray-50">
+                                    <td className="p-3 text-sm text-gray-600 w-[60px]">{index + 1}</td>
+                                    <td className="p-3 text-sm text-gray-600">{role.name}</td>
+                                    <td className="p-3 text-sm text-gray-600">{role.description}</td>
                                     <td className="p-3 text-sm w-[80px]">
                                     <div className="flex items-center justify-center">
                                         <input
