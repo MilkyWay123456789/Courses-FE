@@ -4,7 +4,8 @@ import axiosInstance from './axiosInstance';
 export interface Role {
   _id: string | number; // Hoặc kiểu ID thực tế của bạn
   name: string;   
-  description: string;     
+  description: string; 
+  enable?: boolean;    
 }
 // Hàm gọi API lấy tất cả roles
 export const fetchAllRoles = async (): Promise<Role[]> => {

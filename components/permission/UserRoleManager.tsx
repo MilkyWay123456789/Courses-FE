@@ -4,7 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { fetchAllRoles, Role } from '@/service/role.service'; 
 import { fetchAllGroup, Group } from '@/service/group.service';
-import { fetchPermissionsByRole, updatePermission, Permission } from '@/service/permission.service'; 
+import { fetchPermissionsByGroup, updatePermission, Permission } from '@/service/permission.service'; 
+import { toast } from "react-hot-toast";
 
 const permissionData = [
   { stt: 1, tenQuyen: 'Báo cáo dịch vụ chi tiết dịch vụ - Xem danh sách', menu: 'Báo cáo dịch vụ' },
@@ -55,11 +56,62 @@ export default function UserRoleManager() {
   //Hàm get permission
   const handleClick = async (groupId: string | number) => {
     setSelectedGroupId(groupId);
-    // Lấy dữ liệu permissions từ API
-    const permissionData = await fetchPermissionsByRole(groupId);
-    setRoles(permissionData);
+
+    // Gọi API lấy danh sách permission theo groupId
+    const permissionData = await fetchPermissionsByGroup(groupId); 
+  
+    // Tạo 1 map để tra nhanh theo roleId
+    const permissionMap = new Map<string, boolean>();
+    permissionData.forEach(p => {
+      permissionMap.set(p.roleId, p.enable); 
+    });
+  
+    // Cập nhật lại trạng thái enable của từng role dựa vào permissionMap
+    setRoles(prev =>
+      prev.map(role => ({
+        ...role,
+        enable: permissionMap.get(String(role._id)) ?? false,
+      }))
+    );
+  };
+  
+  //Hàm lưu permission
+  const handleSavePermissions = async () => {
+    if (!selectedGroupId) {
+      toast.error("Vui lòng chọn nhóm trước khi lưu quyền!");
+      return;
+    }
+  
+    const checkedPermissions = roles
+    .filter(role => role.enable)
+    .map(role => ({
+      roleId: String(role._id),
+      groupId: String(selectedGroupId),
+      enable: true,
+    }));
+  
+    const success = await updatePermission(selectedGroupId, checkedPermissions);
+  
+    if (success) {
+      toast.success("Cập nhật quyền thành công!");
+    } else {
+      toast.error("Có lỗi khi cập nhật quyền.");
+    }
   };
 
+  //Xử lý checkbox
+  const toggleRoleEnable = (roleId: string | number) => {
+    setRoles(prev =>
+      prev.map(role =>
+        role._id === roleId
+          ? { ...role, enable: role.enable === undefined ? false : !role.enable }
+          : role
+      )
+    );
+  };
+  
+  
+  
   return (
     <div className="flex h-screen bg-gray-100">
         {/* Nội dung chính */}
@@ -70,13 +122,14 @@ export default function UserRoleManager() {
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-4">
                     <Input
-                        placeholder="Tìm kiếm tài khoản..."
+                        placeholder="Tìm kiếm nhóm quyền..."
                         className="w-64 rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
                     </div>
-                    <Button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white rounded-md">
+                    <Button className="bg-blue-600 hover:bg-blue-700 px-4 py-2 text-white rounded-md"
+                    onClick={handleSavePermissions}>
                     Lưu thay đổi
                     </Button>
                 </div>
@@ -139,8 +192,9 @@ export default function UserRoleManager() {
                                     <div className="flex items-center justify-center">
                                         <input
                                         type="checkbox"
-                                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        defaultChecked
+                                        className="form-checkbox h-4 w-4 accent-blue-600"
+                                        checked={role.enable || false}
+                                        onChange={() => toggleRoleEnable(role._id)}
                                         />
                                     </div>
                                     </td>
