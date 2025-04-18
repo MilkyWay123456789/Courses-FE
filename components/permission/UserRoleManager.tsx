@@ -8,20 +8,13 @@ import { fetchAllGroup, Group } from '@/service/group.service';
 import { fetchPermissionsByGroup, updatePermission, Permission } from '@/service/permission.service'; 
 import { toast } from "react-hot-toast";
 
-const permissionData = [
-  { stt: 1, tenQuyen: 'Báo cáo dịch vụ chi tiết dịch vụ - Xem danh sách', menu: 'Báo cáo dịch vụ' },
-  { stt: 2, tenQuyen: 'Báo cáo dịch vụ chi tiết dịch vụ - Xuất excel danh sách', menu: 'Báo cáo dịch vụ' },
-  // Thêm các dòng dữ liệu khác từ ảnh
-];
 
 export default function UserRoleManager() {
-  const [activeMenu, setActiveMenu] = useState('permission');
   const [searchTerm, setSearchTerm] = useState('');
   const [roles, setRoles] = useState<Role[]>([]); 
   const [groups, setGroups] = useState<Group[]>([]); 
   const [isLoadingRoles, setIsLoadingRoles] = useState(false); 
   const [isLoadingGroups, setIsLoadingGroups] = useState(false); 
-  const [selectedRole, setSelectedRole] = useState(''); 
   const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
   //Hàm search 
