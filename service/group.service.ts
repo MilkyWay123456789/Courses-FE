@@ -7,15 +7,18 @@ export interface Group {
   description: string;     
 }
 // Hàm gọi API lấy tất cả Group
-export const fetchAllGroup = async (): Promise<Group[]> => {
+export const fetchAllGroup = async (keyword?: string): Promise<Group[]> => {
   try {
-    const response = await axiosInstance.get<Group[]>('groups/GetGroup');
+    const response = await axiosInstance.get<Group[]>('groups/GetGroup', {
+      params: { keyword },
+    });
     return response.data;
   } catch (error) {
     console.error("Error fetching Groups:", error);
     return [];
   }
 };
+
 
 // Hàm gọi API thêm Group mới
 export const addGroup = async (Group: Omit<Group, '_id'>): Promise<Group | null> => {

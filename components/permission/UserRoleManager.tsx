@@ -1,5 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { debounce } from "lodash";
+import React, { useCallback, useEffect, useState } from "react";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { fetchAllRoles, Role } from '@/service/role.service'; 
@@ -23,6 +24,13 @@ export default function UserRoleManager() {
   const [selectedRole, setSelectedRole] = useState(''); 
   const [selectedGroupId, setSelectedGroupId] = useState<string | number>();
 
+  //Hàm search 
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      fetchAllGroup(value).then(setGroups);
+    }, 500),
+    []
+  );
   // Gọi API khi component được mount lần đầu
   useEffect(() => {
     //Hàm load role 
@@ -38,20 +46,10 @@ export default function UserRoleManager() {
       }
     };
     loadRoles();
-    //Hàm load role 
-    const loadGroups = async () => {
-      setIsLoadingGroups(true); 
-      try {
-        const fetchedGroups = await fetchAllGroup();
-        setGroups(fetchedGroups); 
-      } catch (error) {
-        console.error("Failed to load roles:", error);
-      } finally {
-        setIsLoadingGroups(false); 
-      }
-    };
-    loadGroups();
-  }, []); 
+    //Gọi hàm search group
+    debouncedSearch(searchTerm);
+  }, [searchTerm, debouncedSearch]);
+
 
   //Hàm get permission
   const handleClick = async (groupId: string | number) => {
