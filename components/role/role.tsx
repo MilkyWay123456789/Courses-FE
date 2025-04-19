@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { fetchAllRoles, addRole, updateRole, deleteRole, Role } from '@/service/role.service'; 
 import AddRoleModal from './Modal/AddRoleModal';
 import DeleteModal from './Modal/DeleteModal';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify'
 
 export default function Roles() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +42,6 @@ export default function Roles() {
       const result = await toast.promise(
         addRole(newRole),
         {
-          loading: 'Đang thêm vai trò...',
           success: 'Thêm vai trò thành công!',
           error: 'Thêm vai trò thất bại!',
         }
@@ -79,7 +78,6 @@ export default function Roles() {
       const result = await toast.promise(
         updateRole(editingRole._id, roleData),
         {
-          loading: 'Đang cập nhật vai trò...',
           success: 'Cập nhật vai trò thành công!',
           error: 'Cập nhật vai trò thất bại!',
         }
@@ -119,7 +117,6 @@ export default function Roles() {
     if (!selectedRoleId) return;
   
     const result = await toast.promise(deleteRole(selectedRoleId), {
-      loading: 'Đang xóa vai trò...',
       success: 'Xóa thành công!',
       error: 'Xóa thất bại!',
     });

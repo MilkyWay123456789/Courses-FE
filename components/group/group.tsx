@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { fetchAllGroup, addGroup, updateGroup, deleteGroup, Group } from '@/service/group.service'; 
 import AddGroupModal from './Modal/AddGroupModal';
 import DeleteModal from './Modal/DeleteGroupModal';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify'
 
 export default function Groups() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -42,7 +42,6 @@ export default function Groups() {
       const result = await toast.promise(
         addGroup(newGroup),
         {
-          loading: 'Đang thêm vai trò...',
           success: 'Thêm vai trò thành công!',
           error: 'Thêm vai trò thất bại!',
         }
@@ -79,7 +78,6 @@ export default function Groups() {
       const result = await toast.promise(
         updateGroup(editingGroup._id, GroupData),
         {
-          loading: 'Đang cập nhật vai trò...',
           success: 'Cập nhật vai trò thành công!',
           error: 'Cập nhật vai trò thất bại!',
         }
@@ -119,7 +117,6 @@ export default function Groups() {
     if (!selectedGroupId) return;
   
     const result = await toast.promise(deleteGroup(selectedGroupId), {
-      loading: 'Đang xóa vai trò...',
       success: 'Xóa thành công!',
       error: 'Xóa thất bại!',
     });

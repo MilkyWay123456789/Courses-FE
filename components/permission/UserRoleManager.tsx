@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { fetchAllRoles, Role } from '@/service/role.service'; 
 import { fetchAllGroup, Group } from '@/service/group.service';
 import { fetchPermissionsByGroup, updatePermission, Permission } from '@/service/permission.service'; 
-import { toast } from "react-hot-toast";
+import { toast } from 'react-toastify'
 
 
 export default function UserRoleManager() {
