@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -57,6 +58,18 @@ export default function RegisterPage() {
           </div>
 
           <div>
+            <label className="block text-sm font-medium">Tên người dùng</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nhập tên người dùng"
+              className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              required
+            />
+          </div>
+
+          <div>
             <label className="block text-sm font-medium">Mật khẩu</label>
             <div className="relative">
               <input
@@ -88,6 +101,7 @@ export default function RegisterPage() {
               required
             />
           </div>
+          
 
           {error && (
             <div className="text-sm text-red-500 text-center">{error}</div>
