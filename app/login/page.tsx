@@ -78,9 +78,12 @@ export default function LoginPage() {
 
           <div className="text-sm text-center text-gray-600">
             Bạn chưa đăng ký sử dụng?{' '}
-            <a href="#" className="text-blue-500 hover:underline">
+            <span
+              onClick={() => router.push('/register')}
+              className="text-blue-500 hover:underline cursor-pointer"
+            >
               Đăng ký
-            </a>
+            </span>
           </div>
 
           <button

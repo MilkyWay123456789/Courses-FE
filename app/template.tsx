@@ -8,7 +8,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
   // Không hiển thị sidebar ở trang login
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;
   }
 
