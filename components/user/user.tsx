@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
-import { fetchAllUser, User } from '@/service/user.service'; 
+import { fetchAllUser, updateUser, deleteUser, User } from '@/service/user.service'; 
 import AddUserModal from './Modal/AddUserModal';
 import DeleteModal from './Modal/DeleteModal';
 import { toast } from 'react-toastify'
+import { Input } from '@/components/ui/input';
 
 export default function Users() {
   const [keyword, setKeyword] = useState(''); 
@@ -12,7 +13,7 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newuser, setNewuser] = useState({ name: '', email: '', password: '' , role: '' });
+  const [newuser, setNewUser] = useState({ name: '', email: '', password: '' , role: '' });
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
   const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [editinguser, setEditinguser] = useState<User | null>(null);
@@ -45,47 +46,48 @@ export default function Users() {
   }, [keyword]);
 
   //Hàm edit user
-//   const handleUpdateUser = async (e: React.FormEvent) => {
-//     e.preventDefault();
+  const handleUpdateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
   
-//     try {
-//       if (!editinguser?._id) {
-//         toast.error('Không tìm thấy ID vai trò để cập nhật!');
-//         return;
-//       }
+    try {
+      if (!editinguser?._id) {
+        toast.error('Không tìm thấy ID vai trò để cập nhật!');
+        return;
+      }
   
-//       const userData = {
-//         name: newuser.name,
-//         description: newuser.description,
-//       };
+      const userData = {
+        id: String(editinguser._id),
+        name: newuser.name,
+        role: newuser.role,
+      };
   
-//       const result = await toast.promise(
-//         updateUser(editinguser._id, userData),
-//         {
-//           success: 'Cập nhật vai trò thành công!',
-//           error: 'Cập nhật vai trò thất bại!',
-//         }
-//       );
+      const result = await toast.promise(
+        updateUser(userData),
+        {
+          success: 'Cập nhật vai trò thành công!',
+          error: 'Cập nhật vai trò thất bại!',
+        }
+      );
   
-//       if (!result) return;
+      if (!result) return;
   
-//       // Cập nhật lại list vai trò
-//       setUsers(prev => prev.map(r => r._id === result._id ? result : r));
+      // Cập nhật lại list vai trò
+      setUsers(prev => prev.map(r => r._id === result._id ? result : r));
   
-//       // Reset form
-//       setNewUser({ name: '', description: '' });
-//       setEditinguser(null);
-//       setIsModalOpen(false);
-//       setMode('add');
-//     } catch (error) {
-//       console.error('Lỗi khi cập nhật vai trò:', error);
-//     }
-//   };
+      // Reset form
+      setNewUser({ name: '', email: '', password: '', role: '' });
+      setEditinguser(null);
+      setIsModalOpen(false);
+      setMode('add');
+    } catch (error) {
+      console.error('Lỗi khi cập nhật vai trò:', error);
+    }
+  };
  
   //Hàm click update
   const handleEditClick = (user: User) => {
     setEditinguser(user); 
-    setNewuser({ name: user.name, email: user.email, password: user.password, role: user.role }); 
+    setNewUser({ name: user.name, email: user.email, password: user.password, role: user.role }); 
     setIsModalOpen(true); 
     setMode('edit'); 
   };
@@ -97,25 +99,25 @@ export default function Users() {
   };
   
   //Hàm xóa
-//   const handleConfirmDelete = async () => {
-//     if (!selecteduserId) return;
+  const handleConfirmDelete = async () => {
+    if (!selecteduserId) return;
   
-//     const result = await toast.promise(deleteUser(selecteduserId), {
-//       success: 'Xóa thành công!',
-//       error: 'Xóa thất bại!',
-//     });
+    const result = await toast.promise(deleteUser(selecteduserId), {
+      success: 'Xóa thành công!',
+      error: 'Xóa thất bại!',
+    });
   
-//     if (result) {
-//       setUsers(prev => prev.filter(user => user._id !== selecteduserId));
-//     }
+    if (result) {
+      setUsers(prev => prev.filter(user => user._id !== selecteduserId));
+    }
   
-//     setIsDeleteModalOpen(false);
-//     setSelecteduserId('');
-//   };
+    setIsDeleteModalOpen(false);
+    setSelecteduserId('');
+  };
 //Hàm input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewuser((prev) => ({ ...prev, [name]: value }));
+    setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -124,13 +126,14 @@ export default function Users() {
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
           <h1 className="text-xl font-semibold text-gray-800">Danh sách quyền</h1>
         </div>
-        <div className="px-2 py-4 flex items-center space-x-4">
-          <input
-            type="text"
-            placeholder="Tìm kiếm người dùng..."
-            className="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-full max-w-xs"
-            onChange={(e) => debouncedFetchUsers(e.target.value)}
-          />
+        <div className="flex items-center justify-between mb-4 mt-4 ml-2">
+            <div className="flex items-center space-x-4">
+                <Input
+                    placeholder="Tìm kiếm người dùng..."
+                    className="w-64 rounded-md border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                    onChange={(e) => debouncedFetchUsers(e.target.value)}
+                />
+            </div>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -219,7 +222,7 @@ export default function Users() {
           </div>
         </div>
       </div>
-      {/* <AddUserModal
+      <AddUserModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
         newUser={newuser}
@@ -231,7 +234,7 @@ export default function Users() {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-      /> */}
+      /> 
     </div>
   );
 }

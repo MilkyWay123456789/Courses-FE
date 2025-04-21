@@ -30,3 +30,30 @@ export const fetchAllUser = async (
       return { data: [], total: 0 };
     }
   }
+
+// Hàm gọi API cập nhật user
+export const updateUser = async (userData: {
+  id: string;
+  name?: string;
+  role?: string;
+}): Promise<User> => {
+  try {
+    const response = await axiosInstance.put<User>('/users/UpdateUser', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
+};
+//Hàm delete user
+export const deleteUser = async (
+  id: string | number,
+): Promise<Boolean> => {
+  try {
+    const response = await axiosInstance.delete<User>(`users/DeleteUser/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Error updating Group:", error);
+    return false;
+  }
+};

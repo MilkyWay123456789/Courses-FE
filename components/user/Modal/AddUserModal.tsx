@@ -111,20 +111,8 @@ const AddUserModal: React.FC<AddUserModalProps> = ({
                 name="email"
                 value={newUser.email}
                 onChange={handleInputChange}
-                className="w-full"
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-               Password
-              </label>
-              <Input
-                type="text"
-                id="password"
-                name="password"
-                value={newUser.password}
-                onChange={handleInputChange}
-                className="w-full"
+                className="w-full bg-gray-100 text-gray-500 cursor-not-allowed"
+                disabled
               />
             </div>
             <div className="mb-6">
