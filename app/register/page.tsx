@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [confirmPass, setConfirmPass] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showRePassword, setShowRePassword] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -92,17 +93,25 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium">Nhập lại mật khẩu</label>
-            <input
-              type="password"
-              value={confirmPass}
-              onChange={(e) => setConfirmPass(e.target.value)}
-              placeholder="Nhập lại mật khẩu"
-              className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showRePassword ? 'text' : 'password'}
+                value={confirmPass}
+                onChange={(e) => setConfirmPass(e.target.value)}
+                placeholder="Nhập lại mật khẩu"
+                className="w-full px-4 py-2 mt-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                required
+              />
+              <button
+                  type="button"
+                  onClick={() => setShowRePassword(!showRePassword)}
+                  className="absolute right-3 top-3 text-gray-500"
+                >
+                  👁️
+                </button>
+            </div>
           </div>
           
-
           {error && (
             <div className="text-sm text-red-500 text-center">{error}</div>
           )}
