@@ -45,6 +45,7 @@ export const updateUser = async (userData: {
     throw error;
   }
 };
+
 //Hàm delete user
 export const deleteUser = async (
   id: string | number,
@@ -55,5 +56,20 @@ export const deleteUser = async (
   } catch (error) {
     console.error("Error updating Group:", error);
     return false;
+  }
+};
+
+//Hàm đổi mật khẩu
+export const changePassword = async (userData: {
+  id: string;
+  oldPassword?: string;
+  newPassword?: string;
+}): Promise<User> => {
+  try {
+    const response = await axiosInstance.put<User>('/users/ChangePassword', userData);
+    return response.data;
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
   }
 };

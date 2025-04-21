@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
-import { fetchAllUser, updateUser, deleteUser, User } from '@/service/user.service'; 
+import { fetchAllUser, updateUser, deleteUser, changePassword, User } from '@/service/user.service'; 
 import { fetchAllGroup, Group } from '@/service/group.service';
 import AddUserModal from './Modal/AddUserModal';
 import DeleteModal from './Modal/DeleteModal';
+import ChangePasswordModal from './Modal/ChangePasswordModal';
 import { toast } from 'react-toastify'
 import { Input } from '@/components/ui/input';
 
@@ -14,9 +15,11 @@ export default function Users() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newuser, setNewUser] = useState({ name: '', email: '', password: '' , role: '' });
+  const [newuser, setNewUser] = useState({ name: '', email: '', password: '' ,newPassword: '', role: '' });
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
   const [editinguser, setEditinguser] = useState<User | null>(null);
+  const [editingPassword, setEditingPassword] = useState<User | null>(null);
+  const [isModalPassOpen, setIsModalPassOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selecteduserId, setSelecteduserId] = useState<string | number>();
   const [groups, setGroups] = useState<Group[]>([]);
@@ -72,8 +75,8 @@ export default function Users() {
       const result = await toast.promise(
         updateUser(userData),
         {
-          success: 'Cập nhật vai trò thành công!',
-          error: 'Cập nhật vai trò thất bại!',
+          success: 'Cập nhật thành công!',
+          error: 'Cập nhật thất bại!',
         }
       );
   
@@ -83,7 +86,7 @@ export default function Users() {
       setUsers(prev => prev.map(r => r._id === result._id ? result : r));
   
       // Reset form
-      setNewUser({ name: '', email: '', password: '', role: '' });
+      setNewUser({ name: '', email: '', password: '', newPassword: '', role: '' });
       setEditinguser(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -94,7 +97,7 @@ export default function Users() {
   //Hàm click update
   const handleEditClick = (user: User) => {
     setEditinguser(user); 
-    setNewUser({ name: user.name, email: user.email, password: user.password, role: user.role }); 
+    setNewUser({ name: user.name, email: user.email, password: user.password, newPassword: '', role: user.role }); 
     setIsModalOpen(true);
   };
 
@@ -120,16 +123,62 @@ export default function Users() {
     setIsDeleteModalOpen(false);
     setSelecteduserId('');
   };
-    //Hàm input
+
+  //Hàm input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
 
-    //Hàm chọn nhóm quyền
+  //Hàm chọn nhóm quyền
   const handleSelectGroup = (selectedRole: string) => {
     setNewUser((prev) => ({ ...prev, role: selectedRole }));
     };
+
+  //Hàm đổi mật khẩu
+  const handleChangePasswordClick = (user: User) => {
+    setEditingPassword(user); 
+    setNewUser({ name: user.name, email: user.email, password: user.password, newPassword: '', role: user.role }); 
+    setIsModalPassOpen(true);
+  };
+
+  //Hàm change password
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    try {
+      if (!editingPassword?._id) {
+        toast.error('Không tìm thấy ID người dùng để đổi mật khẩu!');
+        return;
+      }
+  
+      const userData = {
+        id: String(editingPassword._id),
+        oldPassword: newuser.password,
+        newPassword: newuser.newPassword,
+      };
+  
+      const result = await toast.promise(
+        changePassword(userData),
+        {
+          success: 'Cập nhật vai trò thành công!',
+          error: 'Cập nhật vai trò thất bại!',
+        }
+      );
+  
+      if (!result) return;
+  
+      // Cập nhật lại list vai trò
+      setUsers(prev => prev.map(r => r._id === result._id ? result : r));
+  
+      // Reset form
+      setNewUser({ name: '', email: '', password: '', newPassword: '', role: '' });
+      setEditingPassword(null);
+      setIsModalPassOpen(false);
+    } catch (error) {
+      console.error('Lỗi khi cập nhật mật khẩu:', error);
+    }
+  };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -204,6 +253,23 @@ export default function Users() {
                             />
                           </svg>
                         </button>
+                        <button
+                            className="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50"
+                            onClick={() => handleChangePasswordClick(user)}
+                            >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-5 w-5"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                fillRule="evenodd"
+                                d="M10 2a8 8 0 11-8 8 8 8 0 018-8zM4 10a6 6 0 1012 0A6 6 0 004 10zm8-1.5a1.5 1.5 0 00-3 0v3a1.5 1.5 0 003 0V8.5z"
+                                clipRule="evenodd"
+                                />
+                            </svg>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -248,6 +314,14 @@ export default function Users() {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
       /> 
+      <ChangePasswordModal
+        isOpen={isModalPassOpen}
+        setIsOpen={setIsModalPassOpen}
+        newUser={newuser}
+        handleInputChange={handleInputChange}
+        handleChangePassword ={handleChangePassword} 
+        triggerButtonRef={triggerButtonRef} 
+      />
     </div>
   );
 }

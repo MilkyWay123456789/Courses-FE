@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 //Hàm gọi api đăng nhập
 export const login = async (email: string, password: string) => {
   const res = await axios.post('/auth/login', { email, password });
-  const token = res.data?.token;
+  const token = res.data?.access_token;
 
   if (token) Cookies.set('access-token', token, { expires: 7 });
 
