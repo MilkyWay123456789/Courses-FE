@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import debounce from 'lodash/debounce';
 import { fetchAllUser, updateUser, deleteUser, User } from '@/service/user.service'; 
+import { fetchAllGroup, Group } from '@/service/group.service';
 import AddUserModal from './Modal/AddUserModal';
 import DeleteModal from './Modal/DeleteModal';
 import { toast } from 'react-toastify'
@@ -15,10 +16,10 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newuser, setNewUser] = useState({ name: '', email: '', password: '' , role: '' });
   const triggerButtonRef = useRef<HTMLButtonElement | null>(null);
-  const [mode, setMode] = useState<'add' | 'edit'>('add');
   const [editinguser, setEditinguser] = useState<User | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selecteduserId, setSelecteduserId] = useState<string | number>();
+  const [groups, setGroups] = useState<Group[]>([]);
 
   // Debounced fetch function
     const debouncedFetchUsers = useMemo(() => 
@@ -38,6 +39,13 @@ export default function Users() {
   
   // Effect gọi API khi keyword đổi
   useEffect(() => {
+    //Hàm get all group
+    const loadGroups = async () => {
+        const data = await fetchAllGroup();
+        setGroups(data);
+      };
+    loadGroups();
+    //Hàm debounced fetch user
     debouncedFetchUsers(keyword);
   
     return () => {
@@ -78,7 +86,6 @@ export default function Users() {
       setNewUser({ name: '', email: '', password: '', role: '' });
       setEditinguser(null);
       setIsModalOpen(false);
-      setMode('add');
     } catch (error) {
       console.error('Lỗi khi cập nhật vai trò:', error);
     }
@@ -88,8 +95,7 @@ export default function Users() {
   const handleEditClick = (user: User) => {
     setEditinguser(user); 
     setNewUser({ name: user.name, email: user.email, password: user.password, role: user.role }); 
-    setIsModalOpen(true); 
-    setMode('edit'); 
+    setIsModalOpen(true);
   };
 
   //Hàm click khi xóa
@@ -114,11 +120,16 @@ export default function Users() {
     setIsDeleteModalOpen(false);
     setSelecteduserId('');
   };
-//Hàm input
+    //Hàm input
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewUser((prev) => ({ ...prev, [name]: value }));
   };
+
+    //Hàm chọn nhóm quyền
+  const handleSelectGroup = (selectedRole: string) => {
+    setNewUser((prev) => ({ ...prev, role: selectedRole }));
+    };
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -229,6 +240,8 @@ export default function Users() {
         handleInputChange={handleInputChange}
         handleUpdateUser={handleUpdateUser} 
         triggerButtonRef={triggerButtonRef} 
+        handleSelectGroup={handleSelectGroup}
+        groups={groups}
       />
       <DeleteModal
         isOpen={isDeleteModalOpen}
