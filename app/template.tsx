@@ -4,12 +4,20 @@ import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '../components/silebar';
 import { logout } from '@/service/auth.service';
 import { toast } from 'react-toastify';
+import { useEffect, useState } from 'react';
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const username = 'admin';
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    const savedUsername = localStorage.getItem("username");
+    if (savedUsername) {
+      setUsername(savedUsername);
+    }
+  }, []);
 
   if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;

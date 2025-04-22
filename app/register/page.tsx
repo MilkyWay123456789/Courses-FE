@@ -27,6 +27,7 @@ export default function RegisterPage() {
 
     try {
       await register(email, password, name);
+      localStorage.setItem("username", name);
       toast.success('Đăng ký thành công 🎉');
       setTimeout(() => {
         router.push('/main');
