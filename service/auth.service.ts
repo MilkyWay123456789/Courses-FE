@@ -7,6 +7,7 @@ export const login = async (email: string, password: string) => {
   const token = res.data?.access_token;
 
   if (token) Cookies.set('access-token', token, { expires: 7 });
+  localStorage.setItem("username", res.data?.user.name);
 
   return res.data;
 };
@@ -23,4 +24,5 @@ export const register = async (email: string, password: string, name: string) =>
 
 export const logout = () => {
   Cookies.remove('access-token');
+  localStorage.removeItem("username");
 };

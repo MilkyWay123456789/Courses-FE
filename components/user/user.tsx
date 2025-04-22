@@ -184,7 +184,7 @@ export default function Users() {
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h1 className="text-xl font-semibold text-gray-800">Danh sách quyền</h1>
+          <h1 className="text-xl font-semibold text-gray-800">Danh sách người dùng</h1>
         </div>
         <div className="flex items-center justify-between mb-4 mt-4 ml-2">
             <div className="flex items-center space-x-4">

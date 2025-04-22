@@ -10,15 +10,21 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState('');
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
-    const savedUsername = localStorage.getItem("username");
+    setHasMounted(true); // đánh dấu đã ở client
+    const savedUsername = localStorage.getItem('username');
     if (savedUsername) {
       setUsername(savedUsername);
     }
   }, []);
 
+  // Nếu chưa ở client thì return null hoặc loading
+  if (!hasMounted) return null;
+
+  // Bỏ layout nếu đang ở login/register
   if (pathname === '/login' || pathname === '/register') {
     return <>{children}</>;
   }
@@ -33,11 +39,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col ml-64">
-        {/* Header */}
         <div className="flex justify-end items-center h-16 px-6 shadow bg-white border-b border-gray-300">
           <span className="mr-4 text-gray-700 font-medium">👋 {username}</span>
 
-          {/* Nút logout trượt mở khi hover */}
           <div className="relative group">
             <button
               onClick={handleLogout}
@@ -47,7 +51,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
                 w-10 group-hover:w-32 px-2 group-hover:px-4
               `}
             >
-              {/* Icon Logout */}
               <svg
                 className="w-5 h-5 flex-shrink-0"
                 fill="none"
@@ -63,7 +66,6 @@ export default function Template({ children }: { children: React.ReactNode }) {
                 />
               </svg>
 
-              {/* Text Logout hiển thị khi hover */}
               <span
                 className={`
                   opacity-0 group-hover:opacity-100 ml-2 transition-opacity duration-300 whitespace-nowrap
@@ -73,10 +75,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
               </span>
             </button>
           </div>
-
         </div>
 
-        {/* Nội dung chính */}
         <main className="flex-1 overflow-y-auto p-8 bg-gray-50">
           {children}
         </main>
